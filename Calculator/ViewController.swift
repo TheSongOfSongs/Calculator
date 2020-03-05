@@ -17,15 +17,22 @@ class ViewController: UIViewController {
     var tempNum: Double = 0
     var isSelectedOperatior: Bool = false
     var isDecimalNumber: Bool = false
+    var howManyDecimal: Int = 0
     
     var operation = 0 // +1, -2, *3, /4, %5
     
     // MARK: - 숫자 클릭
     func resultChange(_ newNum: Double) {
-        printNum = printNum * 10 + newNum
-        
-        if isDecimalNumber == true {
-            printNum *= 0.1
+        var fraction = newNum
+        if howManyDecimal > 0 {
+            for _ in 0..<howManyDecimal {
+                fraction *= 0.1
+            }
+            howManyDecimal += 1
+            printNum += fraction
+        }
+        else {
+            printNum = printNum * 10 + newNum
         }
         self.result.text = removePoint(num: printNum)
     }
@@ -73,6 +80,7 @@ class ViewController: UIViewController {
     
     @IBAction func dot(_ sender: Any) {
         isDecimalNumber = true
+        howManyDecimal += 1
         self.result.text = removePoint(num: printNum) + "."
     }
     
@@ -112,6 +120,7 @@ class ViewController: UIViewController {
         }
         operation = 0
         isSelectedOperatior = false
+        howManyDecimal = 0
     }
     
     func whenSelectedOperator(_ num:Int) {
@@ -123,6 +132,7 @@ class ViewController: UIViewController {
         operation = num
         tempNum = printNum
         printNum = 0
+        howManyDecimal = 0
     }
     
     func operateTwoNum(_ a: Double, _ b: Double, operation: (Double, Double) -> Double) {
