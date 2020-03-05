@@ -12,16 +12,17 @@ class ViewController: UIViewController {
     
     @IBOutlet var result: UILabel!
     
-    var printNum = 0
-    var tempNum = 0
+    var printLabel = "0"
+    var printNum: Double = 0
+    var tempNum: Double = 0
     var isSelectedOperatior: Bool = false
     
     var operation = 0 // +1, -2, *3, /4, %5
     
     // MARK: - 숫자 클릭
-    func resultChange(_ a: Int) {
-        printNum = printNum * 10 + a
-        result.text = String(printNum)
+    func resultChange(_ newNum: Double) {
+        printNum = printNum * 10 + newNum
+        self.result.text = isInteger(num: printNum)
     }
     
     @IBAction func num1(_ sender: Any) { resultChange(1) }
@@ -68,17 +69,17 @@ class ViewController: UIViewController {
     @IBAction func dot(_ sender: Any) {
         var printNumString = String(printNum)
         printNumString.append(".")
-        result.text = printNumString
+        self.result.text = printNumString
     }
     
     @IBAction func clear(_ sender: Any) {
         printNum = 0
-        result.text = "0"
+        self.result.text = "0"
     }
     
     @IBAction func toggle(_ sender: Any) {
         printNum *= -1
-        result.text = String(printNum)
+        self.result.text = isInteger(num: printNum)
     }
     
     @IBAction func braketFirst(_ sender: Any) {
@@ -118,17 +119,36 @@ class ViewController: UIViewController {
         printNum = 0
     }
     
-    func operateTwoNum(_ a: Int, _ b: Int, operation: (Int, Int) -> Int) {
+    func operateTwoNum(_ a: Double, _ b: Double, operation: (Double, Double) -> Double) {
         printNum = operation(a, b)
-        result.text = String(printNum)
+        self.result.text = isInteger(num: printNum)
     }
     
-    var operateAdd: (Int, Int) -> Int = { $0 + $1 }
-    var operateSub: (Int, Int) -> Int = { $0 - $1 }
-    var operateMultiply: (Int, Int) -> Int = { $0 * $1 }
-    var operateDivide: (Int, Int) -> Int = { $0 / $1 }
-    var operateRemainder: (Int, Int) -> Int = { $0 % $1 }
+    var operateAdd: (Double, Double) -> Double = { $0 + $1 }
+    var operateSub: (Double, Double) -> Double = { $0 - $1 }
+    var operateMultiply: (Double, Double) -> Double = { $0 * $1 }
+    var operateDivide: (Double, Double) -> Double = { $0 / $1 }
+    var operateRemainder: (Double, Double) -> Double = { $0.truncatingRemainder(dividingBy: $1) }
     
+    
+    // MARK: 소수점 제거
+    func isInteger(num: Double) -> String {
+        var floatNumString = String(num)
+        
+        if num == floor(num) {
+            for _ in 0..<floatNumString.count {
+                if floatNumString.last == "." {
+                    floatNumString.removeLast()
+                    break
+                }
+                else {
+                    floatNumString.removeLast()
+                }
+            }
+        }
+        
+        return floatNumString
+    }
     
     
     override func viewDidLoad() {
