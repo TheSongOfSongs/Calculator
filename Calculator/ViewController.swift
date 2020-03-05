@@ -68,7 +68,6 @@ class ViewController: UIViewController {
     
     @IBAction func dot(_ sender: Any) {
         var printNumString = String(printNum)
-        printNumString.append(".")
         self.result.text = printNumString
     }
     
