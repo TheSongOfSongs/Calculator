@@ -16,13 +16,18 @@ class ViewController: UIViewController {
     var printNum: Double = 0
     var tempNum: Double = 0
     var isSelectedOperatior: Bool = false
+    var isDecimalNumber: Bool = false
     
     var operation = 0 // +1, -2, *3, /4, %5
     
     // MARK: - 숫자 클릭
     func resultChange(_ newNum: Double) {
         printNum = printNum * 10 + newNum
-        self.result.text = isInteger(num: printNum)
+        
+        if isDecimalNumber == true {
+            printNum *= 0.1
+        }
+        self.result.text = removePoint(num: printNum)
     }
     
     @IBAction func num1(_ sender: Any) { resultChange(1) }
@@ -67,18 +72,19 @@ class ViewController: UIViewController {
     }
     
     @IBAction func dot(_ sender: Any) {
-        var printNumString = String(printNum)
-        self.result.text = printNumString
+        isDecimalNumber = true
+        self.result.text = removePoint(num: printNum) + "."
     }
     
     @IBAction func clear(_ sender: Any) {
         printNum = 0
+        isDecimalNumber = false
         self.result.text = "0"
     }
     
     @IBAction func toggle(_ sender: Any) {
         printNum *= -1
-        self.result.text = isInteger(num: printNum)
+        self.result.text = removePoint(num: printNum)
     }
     
     @IBAction func braketFirst(_ sender: Any) {
@@ -89,7 +95,7 @@ class ViewController: UIViewController {
     }
     
     // MARK: - 연산 기능 함수
-    @IBAction func print(_ sender: Any) {
+    @IBAction func printResult(_ sender: Any) {
         switch operation {
         case 1:
             operateTwoNum(tempNum, printNum, operation: operateAdd)
@@ -113,6 +119,7 @@ class ViewController: UIViewController {
             return
         }
         isSelectedOperatior = true
+        isDecimalNumber = false
         operation = num
         tempNum = printNum
         printNum = 0
@@ -120,7 +127,7 @@ class ViewController: UIViewController {
     
     func operateTwoNum(_ a: Double, _ b: Double, operation: (Double, Double) -> Double) {
         printNum = operation(a, b)
-        self.result.text = isInteger(num: printNum)
+        self.result.text = removePoint(num: printNum)
     }
     
     var operateAdd: (Double, Double) -> Double = { $0 + $1 }
@@ -131,7 +138,7 @@ class ViewController: UIViewController {
     
     
     // MARK: 소수점 제거
-    func isInteger(num: Double) -> String {
+    func removePoint(num: Double) -> String {
         var floatNumString = String(num)
         
         if num == floor(num) {
@@ -149,6 +156,7 @@ class ViewController: UIViewController {
         return floatNumString
     }
     
+
     
     override func viewDidLoad() {
         super.viewDidLoad()
