@@ -12,28 +12,41 @@ class ViewController: UIViewController {
     
     @IBOutlet var result: UILabel!
     
-    var printLabel = "0"
+    let maxNumButton = 9
+    
     var printNum: Double = 0
     var tempNum: Double = 0
     var isSelectedOperatior: Bool = false
-    var isDecimalNumber: Bool = false
+    var howManyFraction: Int = 0
     var howManyDecimal: Int = 0
     
     var operation = 0 // +1, -2, *3, /4, %5
     
     // MARK: - 숫자 클릭
     func resultChange(_ newNum: Double) {
-        var fraction = newNum
-        if howManyDecimal > 0 {
-            for _ in 0..<howManyDecimal {
-                fraction *= 0.1
-            }
-            howManyDecimal += 1
-            printNum += fraction
+        guard howManyDecimal < maxNumButton else {
+            return
         }
+        
+        howManyDecimal += 1
+        var fraction = newNum
+        var powTen = 1
+        
+        if howManyFraction > 0 {
+            for _ in 0..<howManyFraction {
+                fraction *= 0.1
+                powTen *= 10
+            }
+            fraction = round(fraction * Double(powTen)) / Double(powTen)
+            printNum += fraction
+            printNum = round(printNum * Double(powTen)) / Double(powTen)
+            howManyFraction += 1
+        }
+            
         else {
             printNum = printNum * 10 + newNum
         }
+ 
         self.result.text = removePoint(num: printNum)
     }
     
@@ -79,14 +92,14 @@ class ViewController: UIViewController {
     }
     
     @IBAction func dot(_ sender: Any) {
-        isDecimalNumber = true
-        howManyDecimal += 1
+        howManyFraction += 1
         self.result.text = removePoint(num: printNum) + "."
     }
     
     @IBAction func clear(_ sender: Any) {
         printNum = 0
-        isDecimalNumber = false
+        howManyFraction = 0
+        howManyDecimal = 0
         self.result.text = "0"
     }
     
@@ -120,6 +133,7 @@ class ViewController: UIViewController {
         }
         operation = 0
         isSelectedOperatior = false
+        howManyFraction = 0
         howManyDecimal = 0
     }
     
@@ -128,16 +142,17 @@ class ViewController: UIViewController {
             return
         }
         isSelectedOperatior = true
-        isDecimalNumber = false
         operation = num
         tempNum = printNum
         printNum = 0
+        howManyFraction = 0
         howManyDecimal = 0
+
     }
     
     func operateTwoNum(_ a: Double, _ b: Double, operation: (Double, Double) -> Double) {
-        printNum = operation(a, b)
-        self.result.text = removePoint(num: printNum)
+        printNum = round(operation(a, b) * 100000000) / 100000000 // 소수점 아래 8자리에서 자르기
+        self.result.text = removePoint(num: printNum) // 이하 0은 삭제 됨
     }
     
     var operateAdd: (Double, Double) -> Double = { $0 + $1 }
@@ -149,20 +164,7 @@ class ViewController: UIViewController {
     
     // MARK: 소수점 제거
     func removePoint(num: Double) -> String {
-        var floatNumString = String(num)
-        
-        if num == floor(num) {
-            for _ in 0..<floatNumString.count {
-                if floatNumString.last == "." {
-                    floatNumString.removeLast()
-                    break
-                }
-                else {
-                    floatNumString.removeLast()
-                }
-            }
-        }
-        
+        let floatNumString = num == floor(num) ? String(format: "%.f", num) : String(num)
         return floatNumString
     }
     
