@@ -16,9 +16,10 @@ class ViewController: UIViewController {
     
     var printNum: Double = 0
     var tempNum: Double = 0
-    var isSelectedOperatior: Bool = false
     var howManyFraction: Int = 0
     var howManyDecimal: Int = 0
+    var expressionArray: [String] = []
+    var isSelectedOperator = false // 곱하기, 나누기, 나머지가 선택된지
     
     var operation = 0 // +1, -2, *3, /4, %5
     
@@ -46,7 +47,7 @@ class ViewController: UIViewController {
         else {
             printNum = printNum * 10 + newNum
         }
- 
+        
         self.result.text = removePoint(num: printNum)
     }
     
@@ -100,6 +101,7 @@ class ViewController: UIViewController {
         printNum = 0
         howManyFraction = 0
         howManyDecimal = 0
+        expressionArray.removeAll()
         self.result.text = "0"
     }
     
@@ -117,6 +119,8 @@ class ViewController: UIViewController {
     
     // MARK: - 연산 기능 함수
     @IBAction func printResult(_ sender: Any) {
+        expressionArray.append(String(printNum))
+        
         switch operation {
         case 1:
             operateTwoNum(tempNum, printNum, operation: operateAdd)
@@ -132,22 +136,37 @@ class ViewController: UIViewController {
             break
         }
         operation = 0
-        isSelectedOperatior = false
         howManyFraction = 0
         howManyDecimal = 0
+        
+        print(expressionArray)
+        print(expressionArrayResult())
     }
     
     func whenSelectedOperator(_ num:Int) {
-        guard !isSelectedOperatior else {
-            return
+        expressionArray.append(String(removePoint(num: printNum)))
+        switch num {
+        case 1:
+            expressionArray.append("+")
+        case 2:
+            expressionArray.append("-")
+        case 3:
+            expressionArray.append("*")
+        case 4:
+            expressionArray.append("/")
+        case 5:
+            expressionArray.append("%")
+        default:
+            break
         }
-        isSelectedOperatior = true
+        
         operation = num
         tempNum = printNum
+        
         printNum = 0
         howManyFraction = 0
         howManyDecimal = 0
-
+        
     }
     
     func operateTwoNum(_ a: Double, _ b: Double, operation: (Double, Double) -> Double) {
@@ -168,7 +187,69 @@ class ViewController: UIViewController {
         return floatNumString
     }
     
-
+    
+    // MARK: 최종 계산
+    func expressionArrayResult() -> String {
+        expressionArray.append("\n")
+        var i: Int = -1
+        var insertNum: Double = 0
+        
+        repeat {
+            i += 1
+            switch expressionArray[i] {
+            case "*" :
+                insertNum = operateMultiply(Double(expressionArray[i-1])!, Double(expressionArray[i+1])!)
+                for _ in 0..<3 { expressionArray.remove(at: i-1) }
+                expressionArray.insert(String(insertNum), at: i-1)
+                i -= 1
+                print(expressionArray)
+            case "/" :
+                insertNum = operateDivide(Double(expressionArray[i-1])!, Double(expressionArray[i+1])!)
+                for _ in 0..<3 { expressionArray.remove(at: i-1) }
+                expressionArray.insert(String(insertNum), at: i-1)
+                 print(expressionArray)
+                i -= 1
+            case "%" :
+                insertNum = operateRemainder(Double(expressionArray[i-1])!, Double(expressionArray[i+1])!)
+                for _ in 0..<3 { expressionArray.remove(at: i-1) }
+                expressionArray.insert(String(insertNum), at: i-1)
+                 print(expressionArray)
+                i -= 1
+            default:
+                break
+            }
+            
+            
+        } while expressionArray[i] != "\n"
+        
+        
+        i = -1
+        insertNum = 0
+        
+        repeat {
+            i += 1
+            switch expressionArray[i] {
+            case "+" :
+                insertNum = operateAdd(Double(expressionArray[i-1])!, Double(expressionArray[i+1])!)
+                for _ in 0..<3 { expressionArray.remove(at: i-1) }
+                expressionArray.insert(String(insertNum), at: i-1)
+                 print(expressionArray)
+                i -= 1
+            case "-" :
+                insertNum = operateSub(Double(expressionArray[i-1])!, Double(expressionArray[i+1])!)
+                for _ in 0..<3 { expressionArray.remove(at: i-1) }
+                expressionArray.insert(String(insertNum), at: i-1)
+                 print(expressionArray)
+                i -= 1
+            default:
+                break
+            }
+        } while expressionArray[i] != "\n"
+        
+        self.result.text = removePoint(num: (Double(expressionArray.first!)!))
+        return " "
+    }
+    
     
     override func viewDidLoad() {
         super.viewDidLoad()
