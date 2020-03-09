@@ -11,6 +11,8 @@ import UIKit
 class ViewController: UIViewController {
     
     @IBOutlet var result: UILabel!
+    @IBOutlet var history: UILabel!
+    
     
     let maxNumButton = 9
     
@@ -19,8 +21,6 @@ class ViewController: UIViewController {
     var howManyFraction: Int = 0
     var howManyDecimal: Int = 0
     var expressionArray: [String] = []
-    var isSelectedOperator = false // 곱하기, 나누기, 나머지가 선택된지
-    
     var operation = 0 // +1, -2, *3, /4, %5
     
     // MARK: - 숫자 클릭
@@ -43,7 +43,6 @@ class ViewController: UIViewController {
             printNum = round(printNum * Double(powTen)) / Double(powTen)
             howManyFraction += 1
         }
-            
         else {
             printNum = printNum * 10 + newNum
         }
@@ -99,8 +98,7 @@ class ViewController: UIViewController {
     
     @IBAction func clear(_ sender: Any) {
         printNum = 0
-        howManyFraction = 0
-        howManyDecimal = 0
+        howManyInit()
         expressionArray.removeAll()
         self.result.text = "0"
     }
@@ -119,28 +117,77 @@ class ViewController: UIViewController {
     
     // MARK: - 연산 기능 함수
     @IBAction func printResult(_ sender: Any) {
-        expressionArray.append(String(printNum))
+        expressionArray.append(String(removePoint(num: printNum)))
+        self.history.text = expressionArray.joined(separator: " ")
+        expressionArray.append("\n")
         
-        switch operation {
-        case 1:
-            operateTwoNum(tempNum, printNum, operation: operateAdd)
-        case 2:
-            operateTwoNum(tempNum, printNum, operation: operateSub)
-        case 3:
-            operateTwoNum(tempNum, printNum, operation: operateMultiply)
-        case 4:
-            operateTwoNum(tempNum, printNum, operation: operateDivide)
-        case 5:
-            operateTwoNum(tempNum, printNum, operation: operateRemainder)
-        default:
-            break
-        }
+        
+        var i: Int = -1
+        var insertNum: Double = 0
+        
+        repeat {
+            i += 1
+            switch expressionArray[i] {
+            case "*" :
+                insertNum = operateTwoNum(Double(expressionArray[i-1])!, Double(expressionArray[i+1])!, operation: operateMultiply)
+                for _ in 0..<3 { expressionArray.remove(at: i-1) }
+                expressionArray.insert(String(insertNum), at: i-1)
+                i -= 1
+                print(expressionArray)
+            case "/" :
+                insertNum = operateTwoNum(Double(expressionArray[i-1])!, Double(expressionArray[i+1])!, operation: operateDivide)
+                for _ in 0..<3 { expressionArray.remove(at: i-1) }
+                expressionArray.insert(String(insertNum), at: i-1)
+                print(expressionArray)
+                i -= 1
+            case "%" :
+                insertNum = operateTwoNum(Double(expressionArray[i-1])!, Double(expressionArray[i+1])!, operation: operateRemainder)
+                for _ in 0..<3 { expressionArray.remove(at: i-1) }
+                expressionArray.insert(String(insertNum), at: i-1)
+                print(expressionArray)
+                i -= 1
+            default:
+                break
+            }
+            
+            
+        } while expressionArray[i] != "\n"
+        
+        
+        i = -1
+        insertNum = 0
+        
+        repeat {
+            i += 1
+            switch expressionArray[i] {
+            case "+" :
+                insertNum = operateTwoNum(Double(expressionArray[i-1])!, Double(expressionArray[i+1])!, operation: operateAdd)
+                for _ in 0..<3 { expressionArray.remove(at: i-1) }
+                expressionArray.insert(String(insertNum), at: i-1)
+                print(expressionArray)
+                i -= 1
+            case "-" :
+                insertNum = operateTwoNum(Double(expressionArray[i-1])!, Double(expressionArray[i+1])!, operation: operateSub)
+                for _ in 0..<3 { expressionArray.remove(at: i-1) }
+                expressionArray.insert(String(insertNum), at: i-1)
+                print(expressionArray)
+                i -= 1
+            default:
+                break
+            }
+        } while expressionArray[i] != "\n"
+        
         operation = 0
-        howManyFraction = 0
-        howManyDecimal = 0
-        
-        print(expressionArray)
-        print(expressionArrayResult())
+        howManyInit()
+        printNum = Double(expressionArray.first!)!
+        self.result.text = removePoint(num: (Double(expressionArray.first!)!))
+        expressionArray.removeAll()
+    }
+    
+    func printHistoryLabel() {
+        for ch in expressionArray {
+            print(ch)
+        }
     }
     
     func whenSelectedOperator(_ num:Int) {
@@ -160,18 +207,19 @@ class ViewController: UIViewController {
             break
         }
         
+        print(expressionArray)
+        
         operation = num
         tempNum = printNum
         
         printNum = 0
-        howManyFraction = 0
-        howManyDecimal = 0
-        
+        howManyInit()
     }
     
-    func operateTwoNum(_ a: Double, _ b: Double, operation: (Double, Double) -> Double) {
+    func operateTwoNum(_ a: Double, _ b: Double, operation: (Double, Double) -> Double) -> Double {
         printNum = round(operation(a, b) * 100000000) / 100000000 // 소수점 아래 8자리에서 자르기
         self.result.text = removePoint(num: printNum) // 이하 0은 삭제 됨
+        return printNum
     }
     
     var operateAdd: (Double, Double) -> Double = { $0 + $1 }
@@ -188,72 +236,16 @@ class ViewController: UIViewController {
     }
     
     
-    // MARK: 최종 계산
-    func expressionArrayResult() -> String {
-        expressionArray.append("\n")
-        var i: Int = -1
-        var insertNum: Double = 0
-        
-        repeat {
-            i += 1
-            switch expressionArray[i] {
-            case "*" :
-                insertNum = operateMultiply(Double(expressionArray[i-1])!, Double(expressionArray[i+1])!)
-                for _ in 0..<3 { expressionArray.remove(at: i-1) }
-                expressionArray.insert(String(insertNum), at: i-1)
-                i -= 1
-                print(expressionArray)
-            case "/" :
-                insertNum = operateDivide(Double(expressionArray[i-1])!, Double(expressionArray[i+1])!)
-                for _ in 0..<3 { expressionArray.remove(at: i-1) }
-                expressionArray.insert(String(insertNum), at: i-1)
-                 print(expressionArray)
-                i -= 1
-            case "%" :
-                insertNum = operateRemainder(Double(expressionArray[i-1])!, Double(expressionArray[i+1])!)
-                for _ in 0..<3 { expressionArray.remove(at: i-1) }
-                expressionArray.insert(String(insertNum), at: i-1)
-                 print(expressionArray)
-                i -= 1
-            default:
-                break
-            }
-            
-            
-        } while expressionArray[i] != "\n"
-        
-        
-        i = -1
-        insertNum = 0
-        
-        repeat {
-            i += 1
-            switch expressionArray[i] {
-            case "+" :
-                insertNum = operateAdd(Double(expressionArray[i-1])!, Double(expressionArray[i+1])!)
-                for _ in 0..<3 { expressionArray.remove(at: i-1) }
-                expressionArray.insert(String(insertNum), at: i-1)
-                 print(expressionArray)
-                i -= 1
-            case "-" :
-                insertNum = operateSub(Double(expressionArray[i-1])!, Double(expressionArray[i+1])!)
-                for _ in 0..<3 { expressionArray.remove(at: i-1) }
-                expressionArray.insert(String(insertNum), at: i-1)
-                 print(expressionArray)
-                i -= 1
-            default:
-                break
-            }
-        } while expressionArray[i] != "\n"
-        
-        self.result.text = removePoint(num: (Double(expressionArray.first!)!))
-        return " "
-    }
-    
-    
     override func viewDidLoad() {
         super.viewDidLoad()
         // Do any additional setup after loading the view.
     }
+    
+    func howManyInit() {
+        howManyDecimal = 0
+        howManyFraction = 0
+    }
+    
+    
 }
 

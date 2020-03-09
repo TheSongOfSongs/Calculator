@@ -263,6 +263,7 @@
                         <viewLayoutGuide key="safeArea" id="6Tk-OE-BBY"/>
                     </view>
                     <connections>
+                        <outlet property="history" destination="dbz-eW-7xH" id="EAZ-pZ-aAd"/>
                         <outlet property="result" destination="L6R-9B-bZx" id="kYx-5s-Klr"/>
                     </connections>
                 </viewController>
