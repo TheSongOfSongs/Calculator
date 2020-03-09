@@ -100,6 +100,7 @@ class ViewController: UIViewController {
         printNum = 0
         howManyInit()
         expressionArray.removeAll()
+        self.history.text = ""
         self.result.text = "0"
     }
     
@@ -109,20 +110,58 @@ class ViewController: UIViewController {
     }
     
     @IBAction func braketFirst(_ sender: Any) {
-        
+        expressionArray.append("(")
     }
+    
     @IBAction func bracketSecond(_ sender: Any) {
-        
+        expressionArray.append(String(printNum))
+        expressionArray.append(")")
     }
     
     // MARK: - 연산 기능 함수
     @IBAction func printResult(_ sender: Any) {
-        expressionArray.append(String(removePoint(num: printNum)))
+        if expressionArray.last != ")" {
+            expressionArray.append(String(removePoint(num: printNum)))
+        }
+
         self.history.text = expressionArray.joined(separator: " ")
         expressionArray.append("\n")
         
-        
         var i: Int = -1
+        
+        // 0) 괄호 생겼을 때
+        repeat {
+            i += 1
+            switch expressionArray[i] {
+            case "(" :
+                getOtherValue(num: i + 1, lastCh: ")")
+                getAddSubValue(num: i + 1, lastCh: ")")
+                expressionArray.remove(at: i)
+                expressionArray.remove(at: i+1)
+            default:
+                break
+            }
+        } while expressionArray[i] != "\n"
+        
+        getOtherValue(num: -1, lastCh: "\n")
+        getAddSubValue(num: -1, lastCh: "\n")
+
+        
+        operation = 0
+        howManyInit()
+        printNum = Double(expressionArray.first!)!
+        self.result.text = removePoint(num: (Double(expressionArray.first!)!))
+        expressionArray.removeAll()
+    }
+    
+    func getBracketValue(i: Int){
+        
+    }
+    
+    
+    // 1) 곱하기, 나누기, 나머지 구하는 연산
+    func getOtherValue(num: Int, lastCh: String) {
+        var i = num
         var insertNum: Double = 0
         
         repeat {
@@ -133,30 +172,29 @@ class ViewController: UIViewController {
                 for _ in 0..<3 { expressionArray.remove(at: i-1) }
                 expressionArray.insert(String(insertNum), at: i-1)
                 i -= 1
-                print(expressionArray)
             case "/" :
                 insertNum = operateTwoNum(Double(expressionArray[i-1])!, Double(expressionArray[i+1])!, operation: operateDivide)
                 for _ in 0..<3 { expressionArray.remove(at: i-1) }
                 expressionArray.insert(String(insertNum), at: i-1)
-                print(expressionArray)
                 i -= 1
             case "%" :
                 insertNum = operateTwoNum(Double(expressionArray[i-1])!, Double(expressionArray[i+1])!, operation: operateRemainder)
                 for _ in 0..<3 { expressionArray.remove(at: i-1) }
                 expressionArray.insert(String(insertNum), at: i-1)
-                print(expressionArray)
                 i -= 1
             default:
                 break
             }
             
-            
-        } while expressionArray[i] != "\n"
-        
-        
-        i = -1
-        insertNum = 0
-        
+        } while expressionArray[i] != lastCh
+    }
+    
+    
+    // 2) 더하기, 빼기 연산
+    func getAddSubValue(num: Int, lastCh: String) {
+        var i = num
+        var insertNum: Double = 0
+
         repeat {
             i += 1
             switch expressionArray[i] {
@@ -175,20 +213,11 @@ class ViewController: UIViewController {
             default:
                 break
             }
-        } while expressionArray[i] != "\n"
+        } while expressionArray[i] != lastCh
         
-        operation = 0
-        howManyInit()
-        printNum = Double(expressionArray.first!)!
-        self.result.text = removePoint(num: (Double(expressionArray.first!)!))
-        expressionArray.removeAll()
     }
     
-    func printHistoryLabel() {
-        for ch in expressionArray {
-            print(ch)
-        }
-    }
+    
     
     func whenSelectedOperator(_ num:Int) {
         expressionArray.append(String(removePoint(num: printNum)))
@@ -206,9 +235,7 @@ class ViewController: UIViewController {
         default:
             break
         }
-        
-        print(expressionArray)
-        
+        self.history.text = expressionArray.joined(separator: " ")
         operation = num
         tempNum = printNum
         
