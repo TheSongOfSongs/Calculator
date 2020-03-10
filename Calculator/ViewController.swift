@@ -110,11 +110,12 @@ class ViewController: UIViewController {
     }
     
     @IBAction func braketFirst(_ sender: Any) {
-        expressionArray.append("(")
+        print(expressionArray)
+        whenSelectedOperator(6)
     }
     
     @IBAction func bracketSecond(_ sender: Any) {
-        expressionArray.append(String(printNum))
+        expressionArray.append(String(removePoint(num: printNum)))
         expressionArray.append(")")
     }
     
@@ -127,25 +128,14 @@ class ViewController: UIViewController {
         self.history.text = expressionArray.joined(separator: " ")
         expressionArray.append("\n")
         
-        var i: Int = -1
+        print(expressionArray)
         
-        // 0) 괄호 생겼을 때
-        repeat {
-            i += 1
-            switch expressionArray[i] {
-            case "(" :
-                getOtherValue(num: i + 1, lastCh: ")")
-                getAddSubValue(num: i + 1, lastCh: ")")
-                expressionArray.remove(at: i)
-                expressionArray.remove(at: i+1)
-            default:
-                break
-            }
-        } while expressionArray[i] != "\n"
-        
+        getBracketValue(num: -1)
+        print(expressionArray)
         getOtherValue(num: -1, lastCh: "\n")
+        print(expressionArray)
         getAddSubValue(num: -1, lastCh: "\n")
-
+        print(expressionArray)
         
         operation = 0
         howManyInit()
@@ -154,10 +144,25 @@ class ViewController: UIViewController {
         expressionArray.removeAll()
     }
     
-    func getBracketValue(i: Int){
-        
+    // 0) 괄호 생겼을 때
+    func getBracketValue(num: Int) {
+        var i = num
+        repeat {
+            i += 1
+            switch expressionArray[i] {
+            case "(" :
+                if !expressionArray.contains(")") {
+                    expressionArray.append(")")
+                }
+                getOtherValue(num: i + 1, lastCh: ")")
+                getAddSubValue(num: i + 1, lastCh: ")")
+                expressionArray.remove(at: i)
+                expressionArray.remove(at: i+1)
+            default:
+                break
+            }
+        } while expressionArray[i] != "\n"
     }
-    
     
     // 1) 곱하기, 나누기, 나머지 구하는 연산
     func getOtherValue(num: Int, lastCh: String) {
@@ -202,13 +207,11 @@ class ViewController: UIViewController {
                 insertNum = operateTwoNum(Double(expressionArray[i-1])!, Double(expressionArray[i+1])!, operation: operateAdd)
                 for _ in 0..<3 { expressionArray.remove(at: i-1) }
                 expressionArray.insert(String(insertNum), at: i-1)
-                print(expressionArray)
                 i -= 1
             case "-" :
                 insertNum = operateTwoNum(Double(expressionArray[i-1])!, Double(expressionArray[i+1])!, operation: operateSub)
                 for _ in 0..<3 { expressionArray.remove(at: i-1) }
                 expressionArray.insert(String(insertNum), at: i-1)
-                print(expressionArray)
                 i -= 1
             default:
                 break
@@ -217,21 +220,31 @@ class ViewController: UIViewController {
         
     }
     
-    
-    
     func whenSelectedOperator(_ num:Int) {
-        expressionArray.append(String(removePoint(num: printNum)))
+        if expressionArray.last != ")" && num != 6  || expressionArray.isEmpty && printNum != 0 {
+            expressionArray.append(String(removePoint(num: printNum)))
+        }
         switch num {
         case 1:
             expressionArray.append("+")
         case 2:
             expressionArray.append("-")
+            
         case 3:
             expressionArray.append("*")
         case 4:
             expressionArray.append("/")
         case 5:
             expressionArray.append("%")
+        case 6:
+            if let test = expressionArray.last {
+                print(test)
+                if test != "+" && test != "-" && test != "*" && test != "/" && test != "%" {
+                    expressionArray.append("*")
+                }
+            }
+            expressionArray.append("(")
+            print(expressionArray)
         default:
             break
         }
