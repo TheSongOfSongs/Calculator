@@ -14,7 +14,7 @@ class ViewController: UIViewController {
     @IBOutlet var history: UILabel!
     
     
-    let maxNumButton = 9
+    let maxNumButton = 15
     
     var printNum: Double = 0
     var tempNum: Double = 0
@@ -25,11 +25,10 @@ class ViewController: UIViewController {
     
     // MARK: - 숫자 클릭
     func resultChange(_ newNum: Double) {
-        guard howManyDecimal < maxNumButton else {
+        guard howManyDecimal + howManyFraction < maxNumButton else {
             return
         }
         
-        howManyDecimal += 1
         var fraction = newNum
         var powTen = 1
         
@@ -44,8 +43,11 @@ class ViewController: UIViewController {
             howManyFraction += 1
         }
         else {
+            howManyDecimal += 1
             printNum = printNum * 10 + newNum
         }
+        
+        print(printNum, howManyDecimal, howManyFraction)
         
         self.result.text = removePoint(num: printNum)
     }
@@ -238,7 +240,6 @@ class ViewController: UIViewController {
             expressionArray.append("%")
         case 6:
             if let test = expressionArray.last {
-                print(test)
                 if test != "+" && test != "-" && test != "*" && test != "/" && test != "%" {
                     expressionArray.append("*")
                 }
