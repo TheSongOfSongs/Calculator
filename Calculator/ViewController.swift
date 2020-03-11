@@ -47,7 +47,7 @@ class ViewController: UIViewController {
             printNum = printNum * 10 + newNum
         }
 
-        self.result.text = removeE(num: removeZero(num: printNum))
+        self.result.text = removeZero(num: printNum)
     }
     
     @IBAction func num1(_ sender: Any) { resultChange(1) }
@@ -123,10 +123,9 @@ class ViewController: UIViewController {
         getAddSubValue(num: -1, lastCh: "\n")
         
         operation = 0
-        howManyInit()
         printNum = Double(expressionArray.first!)!
-        self.result.text = removeE(num: String(printNum))
         expressionArray.removeAll()
+        howManyInit()
     }
     
     // 0) 괄호 생겼을 때
@@ -248,23 +247,11 @@ class ViewController: UIViewController {
     var operateRemainder: (Double, Double) -> Double = { $0.truncatingRemainder(dividingBy: $1) }
     
     
-    // MARK: 소수점 제거
+    // MARK: 소숫점아래0, 자연로그e 제거
     func removeZero(num: Double) -> String {
         let formatString = "%." + String(howManyFraction-1) + "f"
         let floatNumString = num == floor(num) ? String(format: formatString, num) : String(num)
-        return floatNumString
-    }
-    
-    
-    override func viewDidLoad() {
-        super.viewDidLoad()
-        // Do any additional setup after loading the view.
-    }
-    
-    func howManyInit() {
-        howManyDecimal = 0
-        howManyFraction = 0
-        isFraction = false
+        return removeE(num: floatNumString)
     }
     
     func removeE(num: String) -> String {
@@ -292,5 +279,19 @@ class ViewController: UIViewController {
             return String(a)
         }
     }
+    
+    func howManyInit() {
+        howManyDecimal = 0
+        howManyFraction = 0
+        isFraction = false
+    }
+    
+    override func viewDidLoad() {
+        super.viewDidLoad()
+        // Do any additional setup after loading the view.
+    }
+    
+    
+    
 }
 
