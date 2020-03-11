@@ -14,14 +14,14 @@ class ViewController: UIViewController {
     @IBOutlet var history: UILabel!
     
     
-    let maxNumButton = 15
+    let maxNumButton = 9
     
     var printNum: Double = 0
-    var tempNum: Double = 0
     var howManyFraction: Int = 0
     var howManyDecimal: Int = 0
     var expressionArray: [String] = []
     var operation = 0 // +1, -2, *3, /4, %5
+    var isFraction: Bool = false
     
     // MARK: - 숫자 클릭
     func resultChange(_ newNum: Double) {
@@ -36,8 +36,8 @@ class ViewController: UIViewController {
             for _ in 0..<howManyFraction {
                 fraction *= 0.1
                 powTen *= 10
+                fraction = round(fraction * Double(powTen)) / Double(powTen)
             }
-            fraction = round(fraction * Double(powTen)) / Double(powTen)
             printNum += fraction
             printNum = round(printNum * Double(powTen)) / Double(powTen)
             howManyFraction += 1
@@ -46,10 +46,8 @@ class ViewController: UIViewController {
             howManyDecimal += 1
             printNum = printNum * 10 + newNum
         }
-        
-        print(printNum, howManyDecimal, howManyFraction)
-        
-        self.result.text = removePoint(num: printNum)
+
+        self.result.text = removeE(num: removeZero(num: printNum))
     }
     
     @IBAction func num1(_ sender: Any) { resultChange(1) }
@@ -73,29 +71,29 @@ class ViewController: UIViewController {
     @IBAction func num0(_ sender: Any) { resultChange(0) }
     
     // MARK: - 연산자 클릭
-    @IBAction func plus(_ sender: Any) {
-        whenSelectedOperator(1)
-    }
+    @IBAction func plus(_ sender: Any) { whenSelectedOperator(1) }
     
-    @IBAction func minus(_ sender: Any) {
-        whenSelectedOperator(2)
-    }
+    @IBAction func minus(_ sender: Any) { whenSelectedOperator(2) }
     
-    @IBAction func multiple(_ sender: Any) {
-        whenSelectedOperator(3)
-    }
+    @IBAction func multiple(_ sender: Any) { whenSelectedOperator(3) }
     
-    @IBAction func divide(_ sender: Any) {
-        whenSelectedOperator(4)
-    }
+    @IBAction func divide(_ sender: Any) { whenSelectedOperator(4) }
     
-    @IBAction func remainder(_ sender: Any) {
-        whenSelectedOperator(5)
+    @IBAction func remainder(_ sender: Any) { whenSelectedOperator(5) }
+    
+    @IBAction func braketFirst(_ sender: Any) { whenSelectedOperator(6) }
+    
+    @IBAction func bracketSecond(_ sender: Any) {
+        expressionArray.append(removeE(num: String(removeZero(num: printNum))))
+        expressionArray.append(")")
     }
     
     @IBAction func dot(_ sender: Any) {
-        howManyFraction += 1
-        self.result.text = removePoint(num: printNum) + "."
+        if !isFraction {
+            isFraction = true
+            howManyFraction += 1
+            self.result.text = removeZero(num: printNum) + "."
+        }
     }
     
     @IBAction func clear(_ sender: Any) {
@@ -108,41 +106,26 @@ class ViewController: UIViewController {
     
     @IBAction func toggle(_ sender: Any) {
         printNum *= -1
-        self.result.text = removePoint(num: printNum)
-    }
-    
-    @IBAction func braketFirst(_ sender: Any) {
-        print(expressionArray)
-        whenSelectedOperator(6)
-    }
-    
-    @IBAction func bracketSecond(_ sender: Any) {
-        expressionArray.append(String(removePoint(num: printNum)))
-        expressionArray.append(")")
+        self.result.text = removeZero(num: printNum)
     }
     
     // MARK: - 연산 기능 함수
     @IBAction func printResult(_ sender: Any) {
         if expressionArray.last != ")" {
-            expressionArray.append(String(removePoint(num: printNum)))
+            expressionArray.append(removeE(num: String(removeZero(num: printNum))))
         }
 
         self.history.text = expressionArray.joined(separator: " ")
         expressionArray.append("\n")
         
-        print(expressionArray)
-        
         getBracketValue(num: -1)
-        print(expressionArray)
         getOtherValue(num: -1, lastCh: "\n")
-        print(expressionArray)
         getAddSubValue(num: -1, lastCh: "\n")
-        print(expressionArray)
         
         operation = 0
         howManyInit()
         printNum = Double(expressionArray.first!)!
-        self.result.text = removePoint(num: (Double(expressionArray.first!)!))
+        self.result.text = removeE(num: String(printNum))
         expressionArray.removeAll()
     }
     
@@ -219,19 +202,17 @@ class ViewController: UIViewController {
                 break
             }
         } while expressionArray[i] != lastCh
-        
     }
     
     func whenSelectedOperator(_ num:Int) {
         if expressionArray.last != ")" && num != 6  || expressionArray.isEmpty && printNum != 0 {
-            expressionArray.append(String(removePoint(num: printNum)))
+            expressionArray.append(removeE(num: String(removeZero(num: printNum))))
         }
         switch num {
         case 1:
             expressionArray.append("+")
         case 2:
             expressionArray.append("-")
-            
         case 3:
             expressionArray.append("*")
         case 4:
@@ -245,21 +226,18 @@ class ViewController: UIViewController {
                 }
             }
             expressionArray.append("(")
-            print(expressionArray)
         default:
             break
         }
         self.history.text = expressionArray.joined(separator: " ")
         operation = num
-        tempNum = printNum
-        
         printNum = 0
         howManyInit()
     }
     
     func operateTwoNum(_ a: Double, _ b: Double, operation: (Double, Double) -> Double) -> Double {
-        printNum = round(operation(a, b) * 100000000) / 100000000 // 소수점 아래 8자리에서 자르기
-        self.result.text = removePoint(num: printNum) // 이하 0은 삭제 됨
+        printNum = round(operation(a, b) * 1000000000000000) / 1000000000000000 // 소수점 아래 15자리에서 자르기
+        self.result.text = removeZero(num: printNum) // 이하 0은 삭제 됨
         return printNum
     }
     
@@ -271,8 +249,9 @@ class ViewController: UIViewController {
     
     
     // MARK: 소수점 제거
-    func removePoint(num: Double) -> String {
-        let floatNumString = num == floor(num) ? String(format: "%.f", num) : String(num)
+    func removeZero(num: Double) -> String {
+        let formatString = "%." + String(howManyFraction-1) + "f"
+        let floatNumString = num == floor(num) ? String(format: formatString, num) : String(num)
         return floatNumString
     }
     
@@ -285,8 +264,33 @@ class ViewController: UIViewController {
     func howManyInit() {
         howManyDecimal = 0
         howManyFraction = 0
+        isFraction = false
     }
     
-    
+    func removeE(num: String) -> String {
+        let a = num
+        
+        if a.contains("e-") {
+            var temp = ""
+            
+            for i in 0..<a.count {
+                let index = a.index(a.startIndex, offsetBy: i)
+                if a[index] == "e" { break }
+                if a[index] == "." { continue }
+                temp.append(a[index])
+            }
+            
+            let start = a.index(a.startIndex, offsetBy: a.count-2)
+            let end = a.index(a.startIndex, offsetBy: a.count)
+            let sub = a[start..<end]
+            
+            var result = "0."
+            for _ in 0..<Int(sub)!-1 { result.append("0") }
+            result.append(temp)
+            return result
+        } else {
+            return String(a)
+        }
+    }
 }
 
