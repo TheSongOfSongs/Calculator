@@ -9,8 +9,7 @@
   - iOS Deploy target : 13.2
   - Swift version : Swift 5
   - Xcode version : 11.6
-- 개발기록 : https://ttuk-ttak.tistory.com/53?category=921567](https://ttuk-ttak.tistory.com/53?category=921567
-
+- 개발기록 : https://ttuk-ttak.tistory.com/53?category=921567
 - 결과물
 
 <img src="https://user-images.githubusercontent.com/46002818/92392500-56457f80-f159-11ea-9107-043269e05116.png" width="200px"/> <img src="https://user-images.githubusercontent.com/46002818/92392509-58a7d980-f159-11ea-8a9b-2b3be1068caf.png" width="200px"/>
