@@ -1,9 +1,6 @@
 # iOS Calculator
 
 - swift 언어와 Xcode를 통해 구현한 간단 계산기
-
-<br/>
-
 - 프로젝트 제작 기간 : 20.03.04 ~ 20.03.18
 - 습득 목표
 	- swift (기본 문법 / 클로저)
@@ -13,8 +10,6 @@
   - Swift version : Swift 5
   - Xcode version : 11.6
 - 개발기록 : https://ttuk-ttak.tistory.com/53?category=921567](https://ttuk-ttak.tistory.com/53?category=921567
-<br/>
-
 
 - 결과물
 
